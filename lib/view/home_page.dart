@@ -1,56 +1,46 @@
 import 'package:DevJournal/model/task/task_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 import 'edit_page.dart';
 
-class HomePage extends StatefulWidget {
-  @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  CalendarController _calendarController;
-  @override
-  void initState() {
-    super.initState();
-    _calendarController = CalendarController();
-    _calendarController.setCalendarFormat(CalendarFormat.month);
-  }
-
-  @override
-  void dispose() {
-    _calendarController.dispose();
-    super.dispose();
-  }
-
+class HomePageHook extends HookWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text("Home Page")),
-      body: TableCalendar(
-        calendarController: _calendarController,
-        locale: 'en_US',
-      ),
-    );
+    final tickerProvider = useSingleTickerProvider();
+    final _animationController = useAnimationController(
+        vsync: tickerProvider, duration: const Duration(milliseconds: 400));
+    return MyHomePage(_animationController);
   }
 }
 
+class HomePageProvider extends ConsumerWidget {
+  @override
+  Widget build(BuildContext context, ScopedReader reader) {
+    return Container();
+  }
+}
+
+//----------------------------------//
+
 class MyHomePage extends StatefulWidget {
+  final AnimationController animationController;
+
+  const MyHomePage(this.animationController);
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
+class _MyHomePageState extends State<MyHomePage> {
   Map<String, List<Task>> _events;
   List _selectedEvents;
-  AnimationController _animationController;
+  // AnimationController _animationController;
   CalendarController _calendarController;
   String _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
-  final _selectedDayIn1Past = DateFormat("yyyy-MM-dd")
-      .format(DateTime.now().subtract(Duration(days: 1)));
-  DateTime dateSelected;
+
   @override
   void initState() {
     super.initState();
@@ -60,17 +50,14 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
     _selectedEvents = _events[_selectedDay] ?? [];
     _calendarController = CalendarController();
 
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 400),
-    );
-
-    _animationController.forward();
+    widget.animationController
+        .forward()
+        .whenComplete(() => widget.animationController.stop());
   }
 
   @override
   void dispose() {
-    _animationController.dispose();
+    widget.animationController.dispose();
     _calendarController.dispose();
     super.dispose();
   }
@@ -100,13 +87,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          // title: Text(widget.title),
-          ),
-      /*
-          DateTime.parse(_selectedDay.split(" ")[0])
-                            .isAfter(DateTime.now()) &&
-           */
+      appBar: AppBar(),
       body: Column(
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
@@ -133,11 +114,6 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
                               return;
                             }
                             setState(() {
-                              final mockData = Task(
-                                  description: "don't have idea",
-                                  startTimes: DateFormat("yyyy-MM-dd HH:mm")
-                                      .format(DateTime.now()));
-
                               eventsChanges(_events)[DateTime.parse(
                                       _selectedDay.split(" ")[0])]
                                   .add(get_task);
@@ -191,7 +167,8 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       builders: CalendarBuilders(
         selectedDayBuilder: (context, date, _) {
           return FadeTransition(
-            opacity: Tween(begin: 0.0, end: 1.0).animate(_animationController),
+            opacity:
+                Tween(begin: 0.0, end: 1.0).animate(widget.animationController),
             child: Container(
               margin: const EdgeInsets.all(4.0),
               padding: const EdgeInsets.only(top: 5.0, left: 6.0),
@@ -246,7 +223,7 @@ class _MyHomePageState extends State<MyHomePage> with TickerProviderStateMixin {
       ),
       onDaySelected: (date, events, holidays) {
         _onDaySelected(date, events, holidays);
-        _animationController.forward(from: 0.0);
+        widget.animationController.forward(from: 0.0);
       },
 
       onVisibleDaysChanged: _onVisibleDaysChanged,

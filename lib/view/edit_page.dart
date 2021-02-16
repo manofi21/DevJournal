@@ -42,7 +42,7 @@ class _AddAndEditTaskPageState extends State<AddAndEditTaskPage> {
         ),
         body: Column(
           children: <Widget>[
-            Text("Tsl"),
+            Text("Task"),
             SizedBox(
               height: 70,
               child: Stack(
@@ -138,7 +138,8 @@ class _AddAndEditTaskPageState extends State<AddAndEditTaskPage> {
                   border: OutlineInputBorder(),
                   labelText: 'Description',
                   // helperText: 'Keep it short, this is just a demo.',
-                  hintText: 'Tell the about feature Description (don\'t more than 150 char.)',
+                  hintText:
+                      'Tell the about feature Description (don\'t more than 150 char.)',
                 ),
                 maxLines: 3,
               ),
