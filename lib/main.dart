@@ -1,5 +1,7 @@
-import 'package:DevJournal/view/edit_page.dart';
+import 'package:DevJournal/view/create_update_page.dart';
 import 'package:DevJournal/view/home_page.dart';
+import 'package:DevJournal/view/login_page.dart';
+import 'package:DevJournal/view/sing_up.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -13,7 +15,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return ProviderScope(
+      child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
           // This is the theme of your application.
@@ -31,10 +34,14 @@ class MyApp extends StatelessWidget {
           // closer together (more dense) than on mobile platforms.
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        home: ProviderScope(
-          child: HomePageHook(),
-        )
+        // home: ProviderScope(
+        //   child: HomePageHook(),
+        // )
         // home: AddAndEditTaskPage(),
-        );
+        // home: SingUp(),
+        // home: SplashScreen(),
+        home: HomePageHook(),
+      ),
+    );
   }
 }

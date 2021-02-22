@@ -81,11 +81,13 @@ class _AddAndEditTaskPageState extends State<AddAndEditTaskPage> {
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       child: SizedBox(
                         width: 360,
-                        child: TextFormField(
-                          controller: projectNameController,
-                          decoration: const InputDecoration(
-                            border: OutlineInputBorder(),
-                            labelText: 'Name of Project',
+                        child: IgnorePointer(
+                          child: TextFormField(
+                            controller: projectNameController,
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              labelText: 'Name of Project',
+                            ),
                           ),
                         ),
                       ),
