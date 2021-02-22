@@ -27,9 +27,8 @@ bool isUpdateDeleteAvailable(_task) =>
     DateTime.now().difference(DateTime.parse((_task).startTimes)).inHours >= 24;
 
 class DateTimeChangeNotifier with ChangeNotifier {
-  static String _selectedDay =
-      DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
-  Map<String, List<dynamic>> _events = {_selectedDay: []};
+  String _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
+  Map<String, List<dynamic>> _events;
   List<dynamic> _selectedEvents;
 
   // Map<String, List<Task>> get getEventsProvider {
@@ -88,12 +87,15 @@ class DateTimeChangeNotifier with ChangeNotifier {
         return;
       }
 
-      if (eventsProvider == null) {
+      if (eventsProvider != null) {
         eventsChanges(
                 eventsProvider)[DateTime.parse(_selectedDay.split(" ")[0])]
             .add(getTask);
+        print(eventsProvider);
       } else {
-        eventsProvider[_selectedDay] = [getTask];
+        Map<String, List<dynamic>> mapInitial = {_selectedDay: []};
+        eventsProvider = mapInitial;
+        eventsProvider[_selectedDay].add(getTask);
       }
 
       _selectedEvents = eventsChanges(
