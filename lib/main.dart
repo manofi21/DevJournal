@@ -2,6 +2,8 @@ import 'package:DevJournal/view/create_update_page.dart';
 import 'package:DevJournal/view/home_page.dart';
 import 'package:DevJournal/view/login_page.dart';
 import 'package:DevJournal/view/sing_up.dart';
+import 'package:DevJournal/view_model/repository/API_repository.dart';
+import 'package:DevJournal/view_model/task_API_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -16,6 +18,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ProviderScope(
+      overrides: [
+        todoRepositoryProvider.overrideWithValue(FakeTodoRepository())
+      ],
       child: MaterialApp(
         title: 'Flutter Demo',
         theme: ThemeData(
@@ -41,6 +46,7 @@ class MyApp extends StatelessWidget {
         // home: SingUp(),
         // home: SplashScreen(),
         home: HomePageHook(),
+        // home: LoginPage(),
       ),
     );
   }

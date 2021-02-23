@@ -5,7 +5,9 @@ class LogOut extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(),
-      body: Container(),
+      body: Center(
+        child: CircularProgressIndicator(),
+      ),
     );
   }
 }

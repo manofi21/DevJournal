@@ -23,21 +23,13 @@ String timesString(Task _task) {
   return firstTime + " - " + lastText;
 }
 
-bool isUpdateDeleteAvailable(_task) =>
+bool isUpdateDeleteAvailable(Task _task) =>
     DateTime.now().difference(DateTime.parse((_task).startTimes)).inHours >= 24;
 
 class DateTimeChangeNotifier with ChangeNotifier {
   String _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
   Map<String, List<dynamic>> _events = {};
   List<dynamic> _selectedEvents;
-
-  // Map<String, List<Task>> get getEventsProvider {
-  //   if (_events == null) {
-  //     _events = {_selectedDay: []};
-  //     notifyListeners();
-  //   }
-  //   return this._events;
-  // }
 
   Map<String, List<dynamic>> get eventsProvider => this._events;
 
@@ -46,18 +38,7 @@ class DateTimeChangeNotifier with ChangeNotifier {
     notifyListeners();
   }
 
-  // _events == null ? {_selectedDay: []} : _events;
-
-  // List<Task> get getSelectedEventProvider {
-  //   if (_selectedEvents == null) {
-  //     _selectedEvents = _events[_selectedDay] ?? [];
-  //     notifyListeners();
-  //   }
-  //   return this._selectedEvents;
-  // }
-
   List<dynamic> get selectedEventProvider => this._selectedEvents;
-  // _events[_selectedDay] == null ? [] : _events[_selectedDay];
 
   set selectedEventProvider(List<dynamic> selectedEvent) {
     this._selectedEvents = selectedEvent;
@@ -94,9 +75,18 @@ class DateTimeChangeNotifier with ChangeNotifier {
             .add(getTask);
         print(eventsProvider);
       } else {
-        Map<String, List<dynamic>> mapInitial = {_selectedDay: []};
-        eventsProvider = mapInitial;
-        eventsProvider[_selectedDay].add(getTask);
+        // Map<String, List<dynamic>> mapInitial = {_selectedDay: []};
+        // eventsProvider = mapInitial;
+        // eventsProvider = {};
+        if (eventsProvider == null) {
+          Map<String, List<dynamic>> mapInitial = {_selectedDay: []};
+          eventsProvider = mapInitial;
+          eventsProvider[_selectedDay] = [];
+          eventsProvider[_selectedDay].add(getTask);
+        } else {
+          eventsProvider[_selectedDay] = [];
+          eventsProvider[_selectedDay].add(getTask);
+        }
       }
 
       _selectedEvents = eventsChanges(

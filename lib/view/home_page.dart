@@ -1,6 +1,7 @@
 import 'package:DevJournal/model/task/task_model.dart';
 import 'package:DevJournal/view/details_dialog.dart';
 import 'package:DevJournal/view_model/date_riverpod.dart';
+import 'package:DevJournal/view_model/task_API_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,6 +54,7 @@ class _HomePageRiverpodState extends State<HomePageRiverpod> {
     return Consumer(
       builder: (context, watch, child) {
         final accessRiverpod = watch(dateTimeChangeProvider);
+        final todosState = watch(todosNotifierProvider.state);
         return Scaffold(
           key: scaffoldKey,
           appBar: AppBar(
@@ -72,29 +74,60 @@ class _HomePageRiverpodState extends State<HomePageRiverpod> {
               })
             ],
           ),
-          body: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              BuidlTableCalendar(
-                animationController: animationController,
-                calendarController: calendarController,
-              ),
-              const SizedBox(height: 10.0),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Task"),
-                    InkWell(
-                        child: Text("Add Task"),
-                        onTap: accessRiverpod.isAddTaskAvailable(context))
+          // yang ini udah pake StateNotifier
+          body: todosState.when(
+              data: (data) {
+                return Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    BuidlTableCalendar(
+                      animationController: animationController,
+                      calendarController: calendarController,
+                    ),
+                    const SizedBox(height: 10.0),
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text("Task"),
+                          InkWell(
+                              child: Text("Add Task"),
+                              onTap: accessRiverpod.isAddTaskAvailable(context))
+                        ],
+                      ),
+                    ),
+                    Expanded(child: BuidlEventList()),
                   ],
-                ),
-              ),
-              Expanded(child: BuidlEventList()),
-            ],
-          ),
+                );
+              },
+              loading: () => Center(child: CircularProgressIndicator()),
+              error: (e, _) => Center(child: Text(e.toString()))),
+
+          // Yang Ini data nya masih kosong
+          // body: Column(
+          //   mainAxisSize: MainAxisSize.max,
+          //   children: <Widget>[
+          //     BuidlTableCalendar(
+          //       animationController: animationController,
+          //       calendarController: calendarController,
+          //     ),
+          //     const SizedBox(height: 10.0),
+          //     Padding(
+          //       padding: const EdgeInsets.all(10.0),
+          //       child: Row(
+          //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //         children: [
+          //           Text("Task"),
+          //           InkWell(
+          //               child: Text("Add Task"),
+          //               onTap: accessRiverpod.isAddTaskAvailable(context))
+          //         ],
+          //       ),
+          //     ),
+          //     Expanded(child: BuidlEventList()),
+          //   ],
+          // ),
         );
       },
     );
@@ -138,13 +171,23 @@ class BuidlTableCalendar extends StatelessWidget {
   Widget build(BuildContext context) {
     String _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
     Map<String, List<dynamic>> _events = {_selectedDay: []};
-    // List _selectedEvents = _events[_selectedDay] ?? [];
     final accessRiverpod = context.read(dateTimeChangeProvider);
+    // final accessAPI = context.read(todosNotifierProvider.state);
+    // // ini nanti munculin data dari _events doang.
+    // // klo tablenya di select
+    // accessAPI.whenData((value) => value.forEach((result) {
+    //       if (_events[result.startTimes] == null) {
+    //         _events[result.startTimes] = [];
+    //       }
+    //       print(result);
+    //       _events[result.startTimes].add(result);
+    //       print(_events[result.startTimes]);
+    //     }));
+    
     return TableCalendar(
       locale: 'en_US',
       calendarController: calendarController,
       events: eventsChanges(accessRiverpod.eventsProvider ?? _events),
-      // holidays: _holidays,
       initialCalendarFormat: CalendarFormat.month,
       formatAnimation: FormatAnimation.slide,
       startingDayOfWeek: StartingDayOfWeek.sunday,
@@ -206,7 +249,6 @@ class BuidlTableCalendar extends StatelessWidget {
         },
       ),
       onDaySelected: (date, events, holidays) {
-        // final listEvents = events as List<Task>;
         accessRiverpod.onDaySelected(date, events, []);
         animationController.forward(from: 0.0);
       },
@@ -260,11 +302,7 @@ class BuidlEventList extends StatelessWidget {
                       _task.description,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    trailing: Text(_task.startTimes.split(" ")[1] +
-                        " - " +
-                        (_task.finishTimes != null
-                            ? _task.finishTimes.split(" ")[1]
-                            : "...")),
+                    trailing: Text(timesString(_task)),
                     onTap: () {
                       showDetailDialog(context, _task);
                     },
@@ -296,341 +334,3 @@ class BuidlEventList extends StatelessWidget {
 //-------------------------------------------------------------//
 //-------------------------------------------------------------//
 //-------------------------------------------------------------//
-
-class MyHomePage extends StatefulWidget {
-  final AnimationController animationController;
-
-  const MyHomePage(this.animationController);
-  @override
-  _MyHomePageState createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  Map<String, List<Task>> _events;
-  List _selectedEvents;
-  // AnimationController _animationController;
-  CalendarController _calendarController = CalendarController();
-  String _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
-
-  @override
-  void initState() {
-    super.initState();
-
-    _events = {_selectedDay: []};
-
-    _selectedEvents = _events[_selectedDay] ?? [];
-    _calendarController = CalendarController();
-
-    widget.animationController
-        .forward()
-        .whenComplete(() => widget.animationController.stop());
-  }
-
-  @override
-  void dispose() {
-    widget.animationController.dispose();
-    _calendarController.dispose();
-    super.dispose();
-  }
-
-  void _onDaySelected(DateTime day, List events, List holidays) {
-    print('CALLBACK: _onDaySelected');
-    setState(() {
-      _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(day);
-      if (events.length == 0) {
-        _events[DateFormat("yyyy-MM-dd HH:mm").format(day)] = [];
-      }
-      print(events);
-      _selectedEvents = events;
-    });
-  }
-
-  void _onVisibleDaysChanged(
-      DateTime first, DateTime last, CalendarFormat format) {
-    print('CALLBACK: _onVisibleDaysChanged');
-  }
-
-  void _onCalendarCreated(
-      DateTime first, DateTime last, CalendarFormat format) {
-    print('CALLBACK: _onCalendarCreated');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        actions: [
-          PopupMenuButton(onSelected: (value) {
-            Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        value == "/LogOut" ? LogOut() : ChangePassword()));
-          }, itemBuilder: (context) {
-            return [
-              PopupMenuItem(
-                  child: Text("Change Password"), value: "/ChangePassword"),
-              PopupMenuItem(child: Text("Log Out"), value: "/LogOut")
-            ];
-          })
-          // FlatButton(onPressed: () {}, child: Text("Change Password")),
-          // FlatButton(onPressed: () {}, child: Text("Log Out"))
-        ],
-      ),
-      body: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          _buildTableCalendarWithBuilders(),
-          const SizedBox(height: 10.0),
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Task"),
-                InkWell(
-                    child: Text("Add Task"),
-                    onTap: DateTime.parse(_selectedDay.split(" ")[0])
-                            .isAfter(DateTime.now().subtract(Duration(days: 1)))
-                        ? () async {
-                            print(_selectedDay);
-                            final Task get_task = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) =>
-                                        AddAndEditTaskPage()));
-                            if (get_task == null) {
-                              return;
-                            }
-                            setState(() {
-                              eventsChanges(_events)[DateTime.parse(
-                                      _selectedDay.split(" ")[0])]
-                                  .add(get_task);
-                              _selectedEvents = eventsChanges(_events)[
-                                  DateTime.parse(_selectedDay.split(" ")[0])];
-                            });
-                          }
-                        : null)
-              ],
-            ),
-          ),
-          Expanded(child: _buildEventList()),
-        ],
-      ),
-    );
-  }
-
-  Map<DateTime, List<dynamic>> eventsChanges(
-      Map<String, List<dynamic>> _events) {
-    Map<DateTime, List<dynamic>> events = Map<DateTime, List<dynamic>>();
-    for (MapEntry<String, List<dynamic>> entry in _events.entries) {
-      List<String> justDate = entry.key.split(" ");
-      events[DateTime.parse(justDate[0])] = entry.value;
-    }
-    print(events);
-    return events;
-  }
-
-  // More advanced TableCalendar configuration (using Builders & Styles)
-  Widget _buildTableCalendarWithBuilders() {
-    return TableCalendar(
-      locale: 'en_US',
-      calendarController: _calendarController,
-      events: eventsChanges(_events),
-      // holidays: _holidays,
-      initialCalendarFormat: CalendarFormat.month,
-      formatAnimation: FormatAnimation.slide,
-      startingDayOfWeek: StartingDayOfWeek.sunday,
-      availableGestures: AvailableGestures.all,
-      availableCalendarFormats: const {
-        CalendarFormat.month: '',
-      },
-      calendarStyle: CalendarStyle(
-        outsideDaysVisible: false,
-        weekendStyle: TextStyle().copyWith(color: Colors.blue[800]),
-      ),
-      headerStyle: HeaderStyle(
-        centerHeaderTitle: true,
-        formatButtonVisible: false,
-      ),
-      builders: CalendarBuilders(
-        selectedDayBuilder: (context, date, _) {
-          return FadeTransition(
-            opacity:
-                Tween(begin: 0.0, end: 1.0).animate(widget.animationController),
-            child: Container(
-              margin: const EdgeInsets.all(4.0),
-              padding: const EdgeInsets.only(top: 5.0, left: 6.0),
-              color: Colors.deepOrange[300],
-              width: 100,
-              height: 100,
-              child: Text(
-                '${date.day}',
-                style: TextStyle().copyWith(fontSize: 16.0),
-              ),
-            ),
-          );
-        },
-        todayDayBuilder: (context, date, _) {
-          return Container(
-            margin: const EdgeInsets.all(4.0),
-            padding: const EdgeInsets.only(top: 5.0, left: 6.0),
-            color: Colors.amber[400],
-            width: 100,
-            height: 100,
-            child: Text(
-              '${date.day}',
-              style: TextStyle().copyWith(fontSize: 16.0),
-            ),
-          );
-        },
-        markersBuilder: (context, date, events, holidays) {
-          final children = <Widget>[];
-
-          if (events.isNotEmpty) {
-            children.add(
-              Positioned(
-                right: 1,
-                bottom: 1,
-                child: _buildEventsMarker(date, events),
-              ),
-            );
-          }
-
-          if (holidays.isNotEmpty) {
-            children.add(
-              Positioned(
-                right: 0,
-                top: 0,
-                child: _buildHolidaysMarker(),
-              ),
-            );
-          }
-
-          return children;
-        },
-      ),
-      onDaySelected: (date, events, holidays) {
-        _onDaySelected(date, events, holidays);
-        widget.animationController.forward(from: 0.0);
-      },
-
-      onVisibleDaysChanged: _onVisibleDaysChanged,
-      onCalendarCreated: _onCalendarCreated,
-    );
-  }
-
-  Widget _buildEventsMarker(DateTime date, List events) {
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      decoration: BoxDecoration(
-        shape: BoxShape.rectangle,
-        color: _calendarController.isSelected(date)
-            ? Colors.brown[500]
-            : _calendarController.isToday(date)
-                ? Colors.brown[300]
-                : Colors.blue[400],
-      ),
-      width: 16.0,
-      height: 16.0,
-      child: Center(
-        child: Text(
-          '${events.length}',
-          style: TextStyle().copyWith(
-            color: Colors.white,
-            fontSize: 12.0,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHolidaysMarker() {
-    return Icon(
-      Icons.add_box,
-      size: 40.0,
-      color: Colors.blueGrey[800],
-    );
-  }
-
-  Widget _buildEventList() {
-    return ListView.builder(
-        itemCount: _selectedEvents.length,
-        itemBuilder: (context, index) {
-          Task _task = (_selectedEvents[index] as Task);
-          return Row(
-            children: [
-              // showDetailDialog
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(width: 0.8),
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  margin: const EdgeInsets.symmetric(
-                      horizontal: 8.0, vertical: 4.0),
-                  child: ListTile(
-                    title: RichText(
-                      text: TextSpan(
-                          style: TextStyle(color: Colors.black),
-                          children: [
-                            TextSpan(
-                              text: _task.projectNames,
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            TextSpan(
-                              text: " - ${_task.featureNames}",
-                              // style: TextStyle(fontWeight: FontWeight.bold),
-                            )
-                          ]),
-                    ),
-                    subtitle: Text(
-                      _task.description,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    trailing: Text(_task.startTimes.split(" ")[1] +
-                        " - " +
-                        (_task.finishTimes != null
-                            ? _task.finishTimes.split(" ")[1]
-                            : "...")),
-                    onTap: () {
-                      showDetailDialog(context, _task);
-                    },
-                  ),
-                ),
-              ),
-              DateTime.now()
-                          .difference(DateTime.parse((_task).startTimes))
-                          .inHours >=
-                      24
-                  ? Container()
-                  : Row(
-                      children: [
-                        IconButton(
-                            icon: Icon(Icons.delete),
-                            onPressed: () {
-                              setState(() {
-                                _selectedEvents.remove(_selectedEvents[index]);
-                              });
-                            }),
-                        IconButton(
-                            icon: Icon(Icons.edit),
-                            onPressed: () async {
-                              final Task get_task = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => AddAndEditTaskPage(
-                                            userTask: _task,
-                                          )));
-                              if (get_task == null) {
-                                return;
-                              }
-                              _selectedEvents[index] = get_task;
-                            }),
-                      ],
-                    ),
-            ],
-          );
-        });
-  }
-}
