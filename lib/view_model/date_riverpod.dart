@@ -28,7 +28,7 @@ bool isUpdateDeleteAvailable(_task) =>
 
 class DateTimeChangeNotifier with ChangeNotifier {
   String _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
-  Map<String, List<dynamic>> _events;
+  Map<String, List<dynamic>> _events = {};
   List<dynamic> _selectedEvents;
 
   // Map<String, List<Task>> get getEventsProvider {
@@ -67,11 +67,12 @@ class DateTimeChangeNotifier with ChangeNotifier {
   void onDaySelected(DateTime day, List events, List holidays) {
     print('CALLBACK: _onDaySelected');
     _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(day);
-    if (events.length == 0) {
+    // print(events.length == 0);
+    if (eventsProvider[_selectedDay] == null) {
       List<dynamic> emtyList = [];
-      eventsProvider = {DateFormat("yyyy-MM-dd HH:mm").format(day): emtyList};
+      eventsProvider[_selectedDay] = emtyList;
     }
-    print(events);
+    // print(events);
     selectedEventProvider = events;
     // notifyListeners();
   }

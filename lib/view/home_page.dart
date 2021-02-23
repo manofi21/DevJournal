@@ -271,10 +271,7 @@ class BuidlEventList extends StatelessWidget {
                   ),
                 ),
               ),
-              DateTime.now()
-                          .difference(DateTime.parse((_task).startTimes))
-                          .inHours >=
-                      24
+              isUpdateDeleteAvailable(_task)
                   ? Container()
                   : Row(
                       children: [
