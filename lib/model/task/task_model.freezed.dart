@@ -15,7 +15,8 @@ class _$TaskTearOff {
 
 // ignore: unused_element
   _Task call(
-      {String idProject,
+      {int id,
+      String idProject,
       String idUser,
       String projectNames,
       String featureNames,
@@ -23,6 +24,7 @@ class _$TaskTearOff {
       String finishTimes,
       String description}) {
     return _Task(
+      id: id,
       idProject: idProject,
       idUser: idUser,
       projectNames: projectNames,
@@ -40,6 +42,7 @@ const $Task = _$TaskTearOff();
 
 /// @nodoc
 mixin _$Task {
+  int get id;
   String get idProject;
   String get idUser;
   String get projectNames;
@@ -57,7 +60,8 @@ abstract class $TaskCopyWith<$Res> {
   factory $TaskCopyWith(Task value, $Res Function(Task) then) =
       _$TaskCopyWithImpl<$Res>;
   $Res call(
-      {String idProject,
+      {int id,
+      String idProject,
       String idUser,
       String projectNames,
       String featureNames,
@@ -76,6 +80,7 @@ class _$TaskCopyWithImpl<$Res> implements $TaskCopyWith<$Res> {
 
   @override
   $Res call({
+    Object id = freezed,
     Object idProject = freezed,
     Object idUser = freezed,
     Object projectNames = freezed,
@@ -85,6 +90,7 @@ class _$TaskCopyWithImpl<$Res> implements $TaskCopyWith<$Res> {
     Object description = freezed,
   }) {
     return _then(_value.copyWith(
+      id: id == freezed ? _value.id : id as int,
       idProject: idProject == freezed ? _value.idProject : idProject as String,
       idUser: idUser == freezed ? _value.idUser : idUser as String,
       projectNames: projectNames == freezed
@@ -109,7 +115,8 @@ abstract class _$TaskCopyWith<$Res> implements $TaskCopyWith<$Res> {
       __$TaskCopyWithImpl<$Res>;
   @override
   $Res call(
-      {String idProject,
+      {int id,
+      String idProject,
       String idUser,
       String projectNames,
       String featureNames,
@@ -129,6 +136,7 @@ class __$TaskCopyWithImpl<$Res> extends _$TaskCopyWithImpl<$Res>
 
   @override
   $Res call({
+    Object id = freezed,
     Object idProject = freezed,
     Object idUser = freezed,
     Object projectNames = freezed,
@@ -138,6 +146,7 @@ class __$TaskCopyWithImpl<$Res> extends _$TaskCopyWithImpl<$Res>
     Object description = freezed,
   }) {
     return _then(_Task(
+      id: id == freezed ? _value.id : id as int,
       idProject: idProject == freezed ? _value.idProject : idProject as String,
       idUser: idUser == freezed ? _value.idUser : idUser as String,
       projectNames: projectNames == freezed
@@ -159,7 +168,8 @@ class __$TaskCopyWithImpl<$Res> extends _$TaskCopyWithImpl<$Res>
 /// @nodoc
 class _$_Task with DiagnosticableTreeMixin implements _Task {
   _$_Task(
-      {this.idProject,
+      {this.id,
+      this.idProject,
       this.idUser,
       this.projectNames,
       this.featureNames,
@@ -167,6 +177,8 @@ class _$_Task with DiagnosticableTreeMixin implements _Task {
       this.finishTimes,
       this.description});
 
+  @override
+  final int id;
   @override
   final String idProject;
   @override
@@ -184,7 +196,7 @@ class _$_Task with DiagnosticableTreeMixin implements _Task {
 
   @override
   String toString({DiagnosticLevel minLevel = DiagnosticLevel.info}) {
-    return 'Task(idProject: $idProject, idUser: $idUser, projectNames: $projectNames, featureNames: $featureNames, startTimes: $startTimes, finishTimes: $finishTimes, description: $description)';
+    return 'Task(id: $id, idProject: $idProject, idUser: $idUser, projectNames: $projectNames, featureNames: $featureNames, startTimes: $startTimes, finishTimes: $finishTimes, description: $description)';
   }
 
   @override
@@ -192,6 +204,7 @@ class _$_Task with DiagnosticableTreeMixin implements _Task {
     super.debugFillProperties(properties);
     properties
       ..add(DiagnosticsProperty('type', 'Task'))
+      ..add(DiagnosticsProperty('id', id))
       ..add(DiagnosticsProperty('idProject', idProject))
       ..add(DiagnosticsProperty('idUser', idUser))
       ..add(DiagnosticsProperty('projectNames', projectNames))
@@ -205,6 +218,8 @@ class _$_Task with DiagnosticableTreeMixin implements _Task {
   bool operator ==(dynamic other) {
     return identical(this, other) ||
         (other is _Task &&
+            (identical(other.id, id) ||
+                const DeepCollectionEquality().equals(other.id, id)) &&
             (identical(other.idProject, idProject) ||
                 const DeepCollectionEquality()
                     .equals(other.idProject, idProject)) &&
@@ -230,6 +245,7 @@ class _$_Task with DiagnosticableTreeMixin implements _Task {
   @override
   int get hashCode =>
       runtimeType.hashCode ^
+      const DeepCollectionEquality().hash(id) ^
       const DeepCollectionEquality().hash(idProject) ^
       const DeepCollectionEquality().hash(idUser) ^
       const DeepCollectionEquality().hash(projectNames) ^
@@ -246,7 +262,8 @@ class _$_Task with DiagnosticableTreeMixin implements _Task {
 
 abstract class _Task implements Task {
   factory _Task(
-      {String idProject,
+      {int id,
+      String idProject,
       String idUser,
       String projectNames,
       String featureNames,
@@ -254,6 +271,8 @@ abstract class _Task implements Task {
       String finishTimes,
       String description}) = _$_Task;
 
+  @override
+  int get id;
   @override
   String get idProject;
   @override

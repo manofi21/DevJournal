@@ -78,7 +78,6 @@ class _SingUpState extends State<SingUp> {
                 currentIndex = 1;
                 pageController.nextPage(
                     duration: Duration(seconds: 1), curve: Curves.ease);
-                //     .then((val) => _lWidget.removeAt(0));
               }
             });
           })
