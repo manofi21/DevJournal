@@ -1,9 +1,11 @@
 import 'package:DevJournal/model/task/task_model.dart';
 import 'package:DevJournal/view/create_update_page.dart';
+import 'package:DevJournal/view_model/task_API_riverpod.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:DevJournal/view/home_page.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 Map<DateTime, List<dynamic>> eventsChanges(Map<String, List<dynamic>> _events) {
@@ -27,9 +29,24 @@ bool isUpdateDeleteAvailable(Task _task) =>
     DateTime.now().difference(DateTime.parse((_task).startTimes)).inHours >= 24;
 
 class DateTimeChangeNotifier with ChangeNotifier {
-  String _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
-  Map<String, List<dynamic>> _events = {};
-  List<dynamic> _selectedEvents;
+  final List<Task> events_provider;
+  DateTimeChangeNotifier(this.events_provider) : _events = {_selectedDay: []} {
+    events_provider.forEach((result) {
+      DateTime getDate = DateTime.parse(result.startTimes.split(" ")[0]);
+
+      if (eventsProvider[result.startTimes] != null) {
+        eventsChanges(eventsProvider)[getDate].add(result);
+      } else {
+        eventsProvider[result.startTimes] = [];
+        eventsProvider[result.startTimes].add(result);
+      }
+    });
+  }
+
+  static String _selectedDay =
+      DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
+  Map<String, List<dynamic>> _events;
+  List<dynamic> _selectedEvents = [];
 
   Map<String, List<dynamic>> get eventsProvider => this._events;
 
@@ -48,50 +65,38 @@ class DateTimeChangeNotifier with ChangeNotifier {
   void onDaySelected(DateTime day, List events, List holidays) {
     print('CALLBACK: _onDaySelected');
     _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(day);
-    // print(events.length == 0);
-    if (eventsProvider[_selectedDay] == null) {
+    if (eventsProvider[_selectedDay] == null && events.length == 0) {
       List<dynamic> emtyList = [];
       eventsProvider[_selectedDay] = emtyList;
     }
-    // print(events);
     selectedEventProvider = events;
-    // notifyListeners();
   }
 
   Function() isAddTaskAvailable(BuildContext context) {
-    bool isAvailable = DateTime.parse(_selectedDay.split(" ")[0])
-        .isAfter(DateTime.now().subtract(Duration(days: 1)));
+    DateTime getDate = DateTime.parse(_selectedDay.split(" ")[0]);
+    bool isAvailable =
+        getDate.isAfter(DateTime.now().subtract(Duration(days: 1)));
 
     Function() addTask = () async {
-      final Task getTask = await Navigator.push(context,
-          MaterialPageRoute(builder: (context) => AddAndEditTaskPage()));
+      final Task getTask = await Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) =>
+                  AddAndEditTaskPage(anotherDay: _selectedDay.split(" ")[0])));
       if (getTask == null) {
         return;
       }
-
-      if (eventsProvider != null) {
-        eventsChanges(
-                eventsProvider)[DateTime.parse(_selectedDay.split(" ")[0])]
-            .add(getTask);
-        print(eventsProvider);
+      // print(getTask.startTimes);
+      if (eventsChanges(eventsProvider)[getDate] != null) {
+        eventsChanges(eventsProvider)[getDate].add(getTask);
       } else {
-        // Map<String, List<dynamic>> mapInitial = {_selectedDay: []};
-        // eventsProvider = mapInitial;
-        // eventsProvider = {};
-        if (eventsProvider == null) {
-          Map<String, List<dynamic>> mapInitial = {_selectedDay: []};
-          eventsProvider = mapInitial;
-          eventsProvider[_selectedDay] = [];
-          eventsProvider[_selectedDay].add(getTask);
-        } else {
-          eventsProvider[_selectedDay] = [];
-          eventsProvider[_selectedDay].add(getTask);
-        }
+        eventsProvider[_selectedDay] = [];
+        eventsProvider[_selectedDay].add(getTask);
       }
+      // print(getTask.startEnds);
 
-      _selectedEvents = eventsChanges(
-          eventsProvider)[DateTime.parse(_selectedDay.split(" ")[0])];
-      notifyListeners();
+      selectedEventProvider = eventsChanges(eventsProvider)[getDate];
+      scaffoldKey.currentContext.read(todosNotifierProvider).add(getTask);
     };
 
     return isAvailable
@@ -105,6 +110,9 @@ class DateTimeChangeNotifier with ChangeNotifier {
 
   void removeTask(int index) {
     _selectedEvents.remove(_selectedEvents[index]);
+    // scaffoldKey.currentContext
+    //     .read(todosNotifierProvider)
+    //     .remove(index, _selectedEvents[index]);
     notifyListeners();
   }
 
@@ -114,11 +122,13 @@ class DateTimeChangeNotifier with ChangeNotifier {
         MaterialPageRoute(
             builder: (context) => AddAndEditTaskPage(
                   userTask: _selectedEvents[index],
+                  // anotherDay: _selectedDay,
                 )));
     if (getTask == null) {
       return;
     }
     _selectedEvents[index] = getTask;
+    // scaffoldKey.currentContext.read(todosNotifierProvider).edit(index, getTask);
     notifyListeners();
   }
 }

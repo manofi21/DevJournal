@@ -8,8 +8,8 @@ abstract class TodoRepository {
   Future<List<Task>> retrieveTodos();
   Future<void> addTodo(Task task);
   // Future<void> toggle(String id);
-  Future<void> edit(Task task);
-  Future<void> remove(int id);
+  Future<void> edit(int id, Task task);
+  Future<void> remove(int id, Task task);
 }
 
 class TodoException implements Exception {
@@ -29,7 +29,7 @@ const double errorLikelihood = 0.4;
 
 class FakeTodoRepository implements TodoRepository {
   FakeTodoRepository() : random = Random() {
-    mockTodoStorage = [...lTask,...lTask2,...lTask3];
+    mockTodoStorage = [...lTask4];
   }
 
   List<Task> mockTodoStorage;
@@ -57,36 +57,37 @@ class FakeTodoRepository implements TodoRepository {
   Future<void> addTodo(Task task) async {
     await _waitRandomTime();
     // updating mock storage
-    if (random.nextDouble() < errorLikelihood) {
-      throw const TodoException('Todo could not be added');
-    } else {
-      mockTodoStorage = [...mockTodoStorage]..add(Task());
-    }
+    // if (random.nextDouble() < errorLikelihood) {
+    //   throw const TodoException('Todo could not be added');
+    // } else {
+    mockTodoStorage = [...mockTodoStorage]..add(Task());
+    // }
   }
 
   @override
-  Future<void> edit(Task task) async {
+  Future<void> edit(int id, Task task) async {
     await _waitRandomTime();
     // updating mock storage
-    if (random.nextDouble() < errorLikelihood) {
-      throw const TodoException('Could not update todo');
-    } else {
-      mockTodoStorage = [
-        for (final todo in mockTodoStorage)
-          if (todo.id == task.id) task else todo,
-      ];
-    }
+    // if (random.nextDouble() < errorLikelihood) {
+    //   throw const TodoException('Could not update todo');
+    // } else {
+    print("API_Repository : " + task.toString());
+    mockTodoStorage = [
+      for (final todo in mockTodoStorage)
+        if (mockTodoStorage.indexOf(todo) == id) task else todo,
+    ];
+    // }
   }
 
   @override
-  Future<void> remove(int id) async {
+  Future<void> remove(int id, Task task) async {
     await _waitRandomTime();
     // updating mock storage
     if (random.nextDouble() < errorLikelihood) {
       throw const TodoException('Todo could not be removed');
     } else {
       mockTodoStorage =
-          mockTodoStorage.where((element) => element.id != id).toList();
+          mockTodoStorage.where((element) => element != task).toList();
     }
   }
 }
@@ -204,4 +205,25 @@ List<Task> lTask3 = [
       startTimes: DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now()),
       finishTimes: DateFormat("yyyy-MM-dd HH:mm")
           .format(DateTime.now().add(Duration(hours: 6)))),
+];
+
+List<Task> lTask4 = [
+  Task(
+      idUser: "2",
+      idProject: "2",
+      projectNames: "DevJournal Web",
+      featureNames: "Dev Schedule",
+      description: "App for record dev activitiy",
+      startTimes: DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now()),
+      finishTimes: DateFormat("yyyy-MM-dd HH:mm")
+          .format(DateTime.now().add(Duration(hours: 4)))),
+  Task(
+      idUser: "2",
+      idProject: "2",
+      projectNames: "DevJournal Web 2",
+      featureNames: "Dev Schedule",
+      description: "App for record dev activitiy 2",
+      startTimes: DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now()),
+      finishTimes: DateFormat("yyyy-MM-dd HH:mm")
+          .format(DateTime.now().add(Duration(minutes: 45)))),
 ];

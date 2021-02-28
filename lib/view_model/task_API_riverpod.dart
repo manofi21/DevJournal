@@ -1,5 +1,8 @@
 import 'package:DevJournal/model/task/task_model.dart';
+import 'package:DevJournal/view/home_page.dart';
+import 'package:DevJournal/view/status_dialog.dart';
 import 'package:DevJournal/view_model/repository/API_repository.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final currentTodo = ScopedProvider<Task>(null);
@@ -15,6 +18,12 @@ final todosNotifierProvider = StateNotifierProvider<TodoNotifier>((ref) {
 final todoExceptionProvider = StateProvider<TodoException>((ref) {
   return null;
 });
+
+void awaitStatus(Map<String, dynamic> map) async {
+  return Future.delayed(Duration(milliseconds: 500), () {
+    showDialogClass(map);
+  });
+}
 
 class TodoNotifier extends StateNotifier<AsyncValue<List<Task>>> {
   TodoNotifier(
@@ -75,36 +84,46 @@ class TodoNotifier extends StateNotifier<AsyncValue<List<Task>>> {
     state = state.whenData((todos) => [...todos]..add(task));
 
     try {
+      showDialogClass();
       await read(todoRepositoryProvider).addTodo(task);
+      Navigator.pop(scaffoldKey.currentContext);
+      awaitStatus({"Success": "Data Has Been Added"});
     } on TodoException catch (e) {
+      Navigator.pop(scaffoldKey.currentContext);
+      awaitStatus({"Error": e.toString()});
       _handleException(e);
     }
   }
 
-  Future<void> edit(Task task) async {
+  Future<void> edit(int id, Task newTask) async {
     _cacheState();
-    state = state.whenData((todos) {
-      return [
-        for (final todo in todos)
-          if (todo.id == task.id) task else todo
-      ];
-    });
-
+// error
     try {
-      await read(todoRepositoryProvider).edit(task);
+      showDialogClass();
+      await read(todoRepositoryProvider).edit(id, newTask);
+      Navigator.pop(scaffoldKey.currentContext);
+      awaitStatus({"Success": "Data Has Been Edited"});
     } on TodoException catch (e) {
+      Navigator.pop(scaffoldKey.currentContext);
+      awaitStatus({"Error": e.toString()});
       _handleException(e);
     }
   }
 
-  Future<void> remove(int id) async {
+  Future<void> remove(int id, Task task) async {
+    //error
     _cacheState();
     state = state.whenData(
-      (value) => value.where((element) => element.id != id).toList(),
+      (value) => value.where((element) => element != task).toList(),
     );
     try {
-      await read(todoRepositoryProvider).remove(id);
+      showDialogClass();
+      await read(todoRepositoryProvider).remove(id, task);
+      Navigator.pop(scaffoldKey.currentContext);
+      awaitStatus({"Success": "Data Has Been Deleted"});
     } on TodoException catch (e) {
+      Navigator.pop(scaffoldKey.currentContext);
+      awaitStatus({"Error": e.toString()});
       _handleException(e);
     }
   }

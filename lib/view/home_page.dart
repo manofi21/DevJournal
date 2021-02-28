@@ -5,11 +5,8 @@ import 'package:DevJournal/view_model/task_API_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
-
 import 'change_password.dart';
-import 'create_update_page.dart';
 import 'log_out.dart';
 
 GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
@@ -25,7 +22,12 @@ class HomePageHook extends HookWidget {
 }
 
 final dateTimeChangeProvider =
-    ChangeNotifierProvider((ref) => DateTimeChangeNotifier());
+    ChangeNotifierProvider<DateTimeChangeNotifier>((ref) {
+  final todosState = ref.watch(todosNotifierProvider.state);
+  List<Task> eventsProvider = List();
+  todosState.whenData((value) => eventsProvider = value);
+  return DateTimeChangeNotifier(eventsProvider);
+});
 
 class HomePageRiverpod extends StatefulWidget {
   final AnimationController animationController;
@@ -74,60 +76,53 @@ class _HomePageRiverpodState extends State<HomePageRiverpod> {
               })
             ],
           ),
-          // yang ini udah pake StateNotifier
-          body: todosState.when(
-              data: (data) {
-                return Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: <Widget>[
-                    BuidlTableCalendar(
-                      animationController: animationController,
-                      calendarController: calendarController,
-                    ),
-                    const SizedBox(height: 10.0),
-                    Padding(
-                      padding: const EdgeInsets.all(10.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Task"),
-                          InkWell(
-                              child: Text("Add Task"),
-                              onTap: accessRiverpod.isAddTaskAvailable(context))
-                        ],
+          body: Container(
+            decoration: BoxDecoration(
+                gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    stops: [
+                  0.0,
+                  0.4
+                ],
+                    colors: [
+                  Color.fromRGBO(64, 69, 76, 1),
+                  Color.fromRGBO(32, 34, 38, 1)
+                ])),
+            child: todosState.when(
+                data: (data) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.max,
+                    children: <Widget>[
+                      BuidlTableCalendar(
+                        animationController: animationController,
+                        calendarController: calendarController,
                       ),
+                      const SizedBox(height: 10.0),
+                      Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text("Task"),
+                            InkWell(
+                                child: Text("Add Task"),
+                                onTap:
+                                    accessRiverpod.isAddTaskAvailable(context))
+                          ],
+                        ),
+                      ),
+                      Expanded(child: BuidlEventList()),
+                    ],
+                  );
+                },
+                loading: () => Center(
+                      child: CircularProgressIndicator(),
                     ),
-                    Expanded(child: BuidlEventList()),
-                  ],
-                );
-              },
-              loading: () => Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text(e.toString()))),
-
-          // Yang Ini data nya masih kosong
-          // body: Column(
-          //   mainAxisSize: MainAxisSize.max,
-          //   children: <Widget>[
-          //     BuidlTableCalendar(
-          //       animationController: animationController,
-          //       calendarController: calendarController,
-          //     ),
-          //     const SizedBox(height: 10.0),
-          //     Padding(
-          //       padding: const EdgeInsets.all(10.0),
-          //       child: Row(
-          //         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //         children: [
-          //           Text("Task"),
-          //           InkWell(
-          //               child: Text("Add Task"),
-          //               onTap: accessRiverpod.isAddTaskAvailable(context))
-          //         ],
-          //       ),
-          //     ),
-          //     Expanded(child: BuidlEventList()),
-          //   ],
-          // ),
+                error: (e, _) => Center(
+                      child: Text(e.toString()),
+                    )),
+          ),
         );
       },
     );
@@ -169,69 +164,95 @@ class BuidlTableCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
-    Map<String, List<dynamic>> _events = {_selectedDay: []};
     final accessRiverpod = context.read(dateTimeChangeProvider);
-    // final accessAPI = context.read(todosNotifierProvider.state);
-    // // ini nanti munculin data dari _events doang.
-    // // klo tablenya di select
-    // accessAPI.whenData((value) => value.forEach((result) {
-    //       if (_events[result.startTimes] == null) {
-    //         _events[result.startTimes] = [];
-    //       }
-    //       print(result);
-    //       _events[result.startTimes].add(result);
-    //       print(_events[result.startTimes]);
-    //     }));
-    
+    final accessAPI = context.read(todosNotifierProvider.state);
     return TableCalendar(
       locale: 'en_US',
       calendarController: calendarController,
-      events: eventsChanges(accessRiverpod.eventsProvider ?? _events),
+      events: eventsChanges(accessRiverpod.eventsProvider),
       initialCalendarFormat: CalendarFormat.month,
       formatAnimation: FormatAnimation.slide,
-      startingDayOfWeek: StartingDayOfWeek.sunday,
+      startingDayOfWeek: StartingDayOfWeek.monday,
       availableGestures: AvailableGestures.all,
       availableCalendarFormats: const {
         CalendarFormat.month: '',
       },
       calendarStyle: CalendarStyle(
         outsideDaysVisible: false,
-        weekendStyle: TextStyle().copyWith(color: Colors.blue[800]),
+        weekdayStyle: TextStyle(color: Colors.white),
+        weekendStyle: TextStyle().copyWith(color: Colors.white),
+        eventDayStyle: TextStyle().copyWith(color: Colors.white),
+        holidayStyle: TextStyle().copyWith(color: Colors.white),
       ),
       headerStyle: HeaderStyle(
-        centerHeaderTitle: true,
-        formatButtonVisible: false,
-      ),
+          rightChevronIcon:
+              Icon(Icons.arrow_right, size: 25, color: Colors.white),
+          leftChevronIcon:
+              Icon(Icons.arrow_left, size: 25, color: Colors.white),
+          centerHeaderTitle: true,
+          formatButtonVisible: false,
+          titleMonthStyle: TextStyle(color: Colors.orange)),
       builders: CalendarBuilders(
         selectedDayBuilder: (context, date, _) {
           return FadeTransition(
             opacity: Tween(begin: 0.0, end: 1.0).animate(animationController),
             child: Container(
-              margin: const EdgeInsets.all(4.0),
-              padding: const EdgeInsets.only(top: 5.0, left: 6.0),
-              color: Colors.deepOrange[300],
-              width: 100,
-              height: 100,
-              child: Text(
-                '${date.day}',
-                style: TextStyle().copyWith(fontSize: 16.0),
+              decoration: BoxDecoration(boxShadow: [
+                BoxShadow(
+                    blurRadius: 10,
+                    spreadRadius: 2,
+                    color: Color.fromRGBO(0, 0, 0, 0.3))
+              ], shape: BoxShape.circle, color: Color.fromRGBO(0, 191, 218, 1)
+                  // color: Colors.deepOrange[300],
+                  ),
+              child: Center(
+                child: Text(
+                  '${date.day}',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ),
           );
+          // return FadeTransition(
+          //   opacity: Tween(begin: 0.0, end: 1.0).animate(animationController),
+          //   child: Container(
+          //     margin: const EdgeInsets.all(4.0),
+          //     padding: const EdgeInsets.only(top: 5.0, left: 6.0),
+          //     color: Colors.deepOrange[300],
+          //     width: 100,
+          //     height: 100,
+          //     child: Text(
+          //       '${date.day}',
+          //       style: TextStyle().copyWith(fontSize: 16.0),
+          //     ),
+          //   ),
+          // );
         },
         todayDayBuilder: (context, date, _) {
           return Container(
-            margin: const EdgeInsets.all(4.0),
-            padding: const EdgeInsets.only(top: 5.0, left: 6.0),
-            color: Colors.amber[400],
-            width: 100,
-            height: 100,
-            child: Text(
-              '${date.day}',
-              style: TextStyle().copyWith(fontSize: 16.0),
+            decoration: BoxDecoration(
+                // color: Colors.orange[400],
+                border: Border.all(color: Colors.orange[400]),
+                borderRadius: BorderRadius.all(Radius.circular(5))),
+            child: Center(
+              child: Text(
+                '${date.day}',
+                style: TextStyle(color: Colors.white),
+                // style: TextStyle().copyWith(fontSize: 16.0),
+              ),
             ),
           );
+          // return Container(
+          //   margin: const EdgeInsets.all(4.0),
+          //   padding: const EdgeInsets.only(top: 5.0, left: 6.0),
+          //   color: Colors.amber[400],
+          //   width: 100,
+          //   height: 100,
+          //   child: Text(
+          //     '${date.day}',
+          //     style: TextStyle().copyWith(fontSize: 16.0),
+          //   ),
+          // );
         },
         markersBuilder: (context, date, events, holidays) {
           final children = <Widget>[];
@@ -260,21 +281,12 @@ class BuidlEventList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final accessRiverpod = context.read(dateTimeChangeProvider);
-    String _selectedDay = DateFormat("yyyy-MM-dd HH:mm").format(DateTime.now());
-    Map<String, List<dynamic>> _events = {_selectedDay: []};
-    List _selectedEvents = _events[_selectedDay] ?? [];
     return ListView.builder(
-        itemCount: (accessRiverpod.selectedEventProvider == null
-                ? _selectedEvents
-                : accessRiverpod.selectedEventProvider)
-            .length,
+        itemCount: accessRiverpod.selectedEventProvider.length,
         itemBuilder: (context, index) {
-          Task _task = ((accessRiverpod.selectedEventProvider == null
-              ? _selectedEvents
-              : accessRiverpod.selectedEventProvider)[index] as Task);
+          Task _task = accessRiverpod.selectedEventProvider[index] as Task;
           return Row(
             children: [
-              // showDetailDialog
               Expanded(
                 child: Container(
                   decoration: BoxDecoration(
@@ -294,7 +306,6 @@ class BuidlEventList extends StatelessWidget {
                             ),
                             TextSpan(
                               text: " - ${_task.featureNames}",
-                              // style: TextStyle(fontWeight: FontWeight.bold),
                             )
                           ]),
                     ),

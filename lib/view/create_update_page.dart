@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 
 class AddAndEditTaskPage extends StatefulWidget {
   final Task userTask;
-  const AddAndEditTaskPage({Key key, this.userTask}) : super(key: key);
+  final String anotherDay;
+  const AddAndEditTaskPage({Key key, this.userTask, this.anotherDay})
+      : super(key: key);
 
   @override
   _AddAndEditTaskPageState createState() => _AddAndEditTaskPageState();
@@ -31,6 +33,12 @@ class _AddAndEditTaskPageState extends State<AddAndEditTaskPage> {
     } else {
       timeStartController.text = DateFormat("HH:mm").format(DateTime.now());
     }
+  }
+
+  String timeReturning(String time) {
+    final dateStart = DateFormat("yyyy-MM-dd ").format(DateTime.now());
+    return (widget.anotherDay != null ? widget.anotherDay + " " : dateStart) +
+        time;
   }
 
   @override
@@ -150,13 +158,11 @@ class _AddAndEditTaskPageState extends State<AddAndEditTaskPage> {
                 onPressed: () {
                   // Task(startTimes: timeController)drop
                   // final times_start = timeController.text.split(":");
-                  final dateTimeStart =
-                      DateFormat("yyyy-MM-dd ").format(DateTime.now());
                   final result = Task(
                       projectNames: projectNameController.text,
                       featureNames: featureNameController.text,
-                      startTimes: dateTimeStart + timeStartController.text,
-                      finishTimes: dateTimeStart + timeFinishController.text,
+                      startTimes: timeReturning(timeStartController.text),
+                      finishTimes: timeReturning(timeFinishController.text),
                       description: descriptionController.text);
                   Navigator.pop(context, result);
                 },
