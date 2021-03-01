@@ -213,20 +213,6 @@ class BuidlTableCalendar extends StatelessWidget {
               ),
             ),
           );
-          // return FadeTransition(
-          //   opacity: Tween(begin: 0.0, end: 1.0).animate(animationController),
-          //   child: Container(
-          //     margin: const EdgeInsets.all(4.0),
-          //     padding: const EdgeInsets.only(top: 5.0, left: 6.0),
-          //     color: Colors.deepOrange[300],
-          //     width: 100,
-          //     height: 100,
-          //     child: Text(
-          //       '${date.day}',
-          //       style: TextStyle().copyWith(fontSize: 16.0),
-          //     ),
-          //   ),
-          // );
         },
         todayDayBuilder: (context, date, _) {
           return Container(
@@ -242,17 +228,6 @@ class BuidlTableCalendar extends StatelessWidget {
               ),
             ),
           );
-          // return Container(
-          //   margin: const EdgeInsets.all(4.0),
-          //   padding: const EdgeInsets.only(top: 5.0, left: 6.0),
-          //   color: Colors.amber[400],
-          //   width: 100,
-          //   height: 100,
-          //   child: Text(
-          //     '${date.day}',
-          //     style: TextStyle().copyWith(fontSize: 16.0),
-          //   ),
-          // );
         },
         markersBuilder: (context, date, events, holidays) {
           final children = <Widget>[];

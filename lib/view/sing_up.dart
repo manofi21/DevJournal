@@ -7,6 +7,8 @@ class SingUp extends StatefulWidget {
 
 class _SingUpState extends State<SingUp> {
   final nameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passController = TextEditingController();
   final positionController = TextEditingController();
   final otpController = TextEditingController();
   final pageController = PageController();
@@ -19,7 +21,16 @@ class _SingUpState extends State<SingUp> {
   void initState() {
     super.initState();
     _lWidget.add(Column(
-      children: [formField(nameController), formField(positionController)],
+      children: [
+        Column(
+          children: [
+            formField(nameController),
+            formField(emailController),
+            formField(passController),
+          ],
+        ),
+        formField(positionController)
+      ],
     ));
   }
 
@@ -43,10 +54,10 @@ class _SingUpState extends State<SingUp> {
                 color: Colors.black87,
               ),
               hintText: controller == nameController
-                  ? "Enter The Name"
-                  : controller == positionController
-                      ? "Enter The Position"
-                      : "Enter The Otp",
+                  ? "Name"
+                  : controller == emailController
+                      ? "Email Address"
+                      : "Password",
               hintStyle: TextStyle(color: Colors.grey, fontSize: 15)),
         ),
       ));
@@ -61,12 +72,12 @@ class _SingUpState extends State<SingUp> {
           SizedBox(height: 40),
           Text("Sign Up"),
           SizedBox(height: 80),
-          SizedBox(
-            height: 200,
-            child: PageView.builder(
-                controller: pageController,
-                itemCount: _lWidget.length,
-                itemBuilder: (context, index) => _lWidget[index]),
+          Column(
+            children: [
+              formField(nameController),
+              formField(emailController),
+              formField(passController),
+            ],
           ),
           RaisedButton(onPressed: () {
             print(_lWidget.length);
@@ -86,3 +97,13 @@ class _SingUpState extends State<SingUp> {
     );
   }
 }
+
+/*
+          SizedBox(
+            height: 200,
+            child: PageView.builder(
+                controller: pageController,
+                itemCount: _lWidget.length,
+                itemBuilder: (context, index) => _lWidget[index]),
+          ),
+*/

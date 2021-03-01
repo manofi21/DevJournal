@@ -7,6 +7,7 @@ import 'package:DevJournal/view_model/task_API_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:DevJournal/view/otp_page.dart';
 import 'package:intl/intl.dart';
 
 void main() {
@@ -45,8 +46,9 @@ class MyApp extends StatelessWidget {
         // home: AddAndEditTaskPage(),
         // home: SingUp(),
         // home: SplashScreen(),
-        home: HomePageHook(),
+        // home: HomePageHook(),
         // home: LoginPage(),
+        home:   LoginPage(),
       ),
     );
   }
