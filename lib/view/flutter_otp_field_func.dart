@@ -1,5 +1,81 @@
 import 'package:flutter/material.dart';
 
+abstract class MaterialField {
+  returnMaterial();
+}
+
+abstract class ClearActionMaterial {
+  clear();
+}
+
+//////////////////////////y
+class ListFocusNode implements MaterialField, ClearActionMaterial {
+  final int materialCount;
+  final List<FocusNode> _listFocusNode = <FocusNode>[];
+  ListFocusNode(this.materialCount);
+  @override
+  returnMaterial() {
+    for (int i = 0; i < materialCount; i++) {
+      _listFocusNode.add(FocusNode());
+    }
+    return _listFocusNode;
+  }
+
+  @override
+  clear() {
+    _listFocusNode.clear();
+  }
+}
+
+class ListControllerText implements MaterialField, ClearActionMaterial {
+  final int materialCount;
+  final List<TextEditingController> _listControllerText =
+      <TextEditingController>[];
+  ListControllerText(this.materialCount);
+
+  @override
+  returnMaterial() {
+    for (int i = 0; i < materialCount; i++) {
+      _listControllerText.add(TextEditingController());
+    }
+    return _listControllerText;
+  }
+
+  String _getInputVerify() {
+    String verifyCode = "";
+    for (var i = 0; i < materialCount; i++) {
+      for (var index = 0; index < _listControllerText[i].text.length; index++) {
+        if (_listControllerText[i].text[index] != "") {
+          verifyCode += _listControllerText[i].text[index];
+        }
+      }
+    }
+    return verifyCode;
+  }
+
+  @override
+  clear() {
+    for (var i = 0; i < materialCount; i++) {
+      _listControllerText[i].text = '';
+    }
+  }
+}
+
+class ListString implements MaterialField {
+  final int materialCount;
+  final List<String> _code = <String>[];
+
+  ListString(this.materialCount);
+
+  @override
+  returnMaterial() {
+    for (int i = 0; i < materialCount; i++) {
+      _code.add('');
+    }
+    return _code;
+  }
+}
+
 class VerificationCode extends StatefulWidget {
   final ValueChanged<String> onCompleted;
   final ValueChanged<String> onSubmitted;
@@ -7,7 +83,6 @@ class VerificationCode extends StatefulWidget {
   final TextInputType keyboardType;
   final int length;
   final double itemSize;
-  // in case underline color is null it will use primaryColor from Theme
   final Color underlineColor;
   final TextStyle textStyle;
   final bool autofocus;
@@ -36,19 +111,24 @@ class VerificationCode extends StatefulWidget {
 }
 
 class _VerificationCodeState extends State<VerificationCode> {
-  static final List<FocusNode> _listFocusNode = <FocusNode>[];
-  final _listControllerText = <TextEditingController>[];
-  List<String> _code = List();
+  List<FocusNode> _listFocusNode; // = <FocusNode>[];
+  List<TextEditingController>
+      _listControllerText; // = <TextEditingController>[];
+  List<String> _code; // = List();
   int _currentIndex = 0;
 
   @override
   void initState() {
-    _listFocusNode.clear();
-    for (var i = 0; i < widget.length; i++) {
-      _listFocusNode.add(FocusNode());
-      _listControllerText.add(TextEditingController());
-      _code.add('');
-    }
+    ListFocusNode sp = ListFocusNode(widget.length);
+    ListControllerText sp2 = ListControllerText(widget.length);
+    ListString sp3 = ListString(widget.length);
+
+    sp.clear();
+
+    _listFocusNode = sp.returnMaterial() as List<FocusNode>;
+    _listControllerText = sp2.returnMaterial() as List<TextEditingController>;
+    _code = sp3.returnMaterial() as List<String>;
+
     super.initState();
   }
 
@@ -80,7 +160,7 @@ class _VerificationCodeState extends State<VerificationCode> {
 
             return;
           }
-        }, //widget.onSubmitted,
+        },
         scrollPadding: EdgeInsets.zero,
         keyboardType: widget.keyboardType,
         maxLines: 1,

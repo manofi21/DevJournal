@@ -2,17 +2,16 @@ import 'package:DevJournal/view/autehntication/parent_background.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:keyboard_visibility/keyboard_visibility.dart';
-import 'package:motion_widget/motion_widget.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage2 extends StatefulWidget {
   @override
-  _LoginPageState createState() => _LoginPageState();
+  _LoginPage2State createState() => _LoginPage2State();
 }
 
-class _LoginPageState extends State<LoginPage>
+class _LoginPage2State extends State<LoginPage2>
     with SingleTickerProviderStateMixin {
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
+  final nameController = TextEditingController();
+  final positionController = TextEditingController();
 
   AnimationController _controller;
   Animation _animation;
@@ -21,8 +20,8 @@ class _LoginPageState extends State<LoginPage>
   int currentIndex = 0;
   bool isIgnore = false;
 
-  FocusNode _focusNodeEmail = FocusNode();
-  FocusNode _focusNodePass = FocusNode();
+  FocusNode _focusNodeName = FocusNode();
+  FocusNode _focusNodePosition = FocusNode();
 
   void isFocusTrue(FocusNode node) {
     if (node.hasFocus) {
@@ -47,18 +46,18 @@ class _LoginPageState extends State<LoginPage>
         setState(() {});
       });
 
-    _focusNodeEmail.addListener(() {
-      isFocusTrue(_focusNodeEmail);
+    _focusNodeName.addListener(() {
+      isFocusTrue(_focusNodeName);
     });
 
-    _focusNodePass.addListener(() {
-      isFocusTrue(_focusNodePass);
+    _focusNodePosition.addListener(() {
+      isFocusTrue(_focusNodePosition);
     });
 
     KeyboardVisibilityNotification().addNewListener(
       onHide: () {
-        _focusNodeEmail.unfocus();
-        _focusNodePass.unfocus();
+        _focusNodeName.unfocus();
+        _focusNodePosition.unfocus();
       },
     );
   }
@@ -73,19 +72,77 @@ class _LoginPageState extends State<LoginPage>
             child: Center(
               child: TextFormField(
                 controller: controller,
-                focusNode: controller == emailController
-                    ? _focusNodeEmail
-                    : _focusNodePass,
+                focusNode: _focusNodeName,
                 decoration: InputDecoration(
                     contentPadding: EdgeInsets.only(left: 10, bottom: 10),
                     border: InputBorder.none,
-                    hintText: controller == emailController
-                        ? "Email Address"
-                        : "Password",
+                    hintText:
+                        controller == nameController ? "Your Name" : "Password",
                     hintStyle: TextStyle(color: Colors.grey, fontSize: 15)),
               ),
             )),
       );
+
+  Widget formPositionField() {
+    return SizedBox(
+        height: 55,
+        child: Container(
+          margin: EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+              color: Color.fromRGBO(244, 243, 243, 1),
+              borderRadius: BorderRadius.circular(15)),
+          child: Stack(
+            children: [
+              Positioned(
+                top: -5,
+                right: 10,
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                      disabledHint: Container(),
+                      iconSize: 40,
+                      onChanged: (str) {
+                        setState(() {
+                          positionController.text = str;
+                        });
+                      },
+                      // value: _chosenValue,
+                      //elevation: 5,
+                      style: TextStyle(color: Colors.black),
+                      items: <String>[
+                        'To-DO List',
+                        'Simple Calculator',
+                        'Cashier',
+                        'Cartoon List',
+                        'Book Store + Library + Trading Book + E-Book Promotion'
+                      ].map<DropdownMenuItem<String>>((String value) {
+                        return DropdownMenuItem<String>(
+                          value: value,
+                          child: Text(value),
+                        );
+                      }).toList()),
+                ),
+              ),
+              // ),
+              Align(
+                alignment: Alignment.topLeft,
+                child: SizedBox(
+                  child: IgnorePointer(
+                    child: TextFormField(
+                      controller: positionController,
+                      decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(left: 10, bottom: 10),
+                          border: InputBorder.none,
+                          hintText: "Position",
+                          hintStyle:
+                              TextStyle(color: Colors.grey, fontSize: 15)),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,8 +157,8 @@ class _LoginPageState extends State<LoginPage>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 10),
-            formField(emailController),
-            formField(passwordController),
+            formField(nameController),
+            formPositionField(),
             nextButton(context),
             SizedBox(
               height: 13,
@@ -139,7 +196,7 @@ Widget nextButton(BuildContext context) {
             color: Color.fromRGBO(120, 33, 232, 1)),
         child: FlatButton(
           onPressed: () {},
-          child: Text("Login",
+          child: Text("Sing Up",
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

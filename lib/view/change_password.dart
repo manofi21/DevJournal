@@ -14,12 +14,6 @@ class OtpChangePassword extends StatelessWidget {
             controller: controller,
             decoration: InputDecoration(
                 border: InputBorder.none,
-                // prefixIcon: Icon(
-                //   controller == emailController
-                //       ? Icons.people_alt_rounded
-                //       : Icons.lock_outlined,
-                //   color: Colors.black87,
-                // ),
                 hintText: "Enter Otp",
                 hintStyle: TextStyle(color: Colors.grey, fontSize: 15)),
           ),
@@ -37,7 +31,6 @@ class OtpChangePassword extends StatelessWidget {
             Text(
                 "Please check your emai. \nWe have sent OTP code to your email."),
             formField(),
-            
           ],
         ),
       ),

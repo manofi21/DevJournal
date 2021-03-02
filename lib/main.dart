@@ -1,6 +1,7 @@
 import 'package:DevJournal/view/create_update_page.dart';
 import 'package:DevJournal/view/home_page.dart';
 import 'package:DevJournal/view/login_page.dart';
+import 'package:DevJournal/view/login_page_2.dart';
 import 'package:DevJournal/view/sing_up.dart';
 import 'package:DevJournal/view_model/repository/API_repository.dart';
 import 'package:DevJournal/view_model/task_API_riverpod.dart';
@@ -40,15 +41,7 @@ class MyApp extends StatelessWidget {
           // closer together (more dense) than on mobile platforms.
           visualDensity: VisualDensity.adaptivePlatformDensity,
         ),
-        // home: ProviderScope(
-        //   child: HomePageHook(),
-        // )
-        // home: AddAndEditTaskPage(),
-        // home: SingUp(),
-        // home: SplashScreen(),
-        // home: HomePageHook(),
-        // home: LoginPage(),
-        home:   LoginPage(),
+        home: OtpPage(),
       ),
     );
   }
